@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Checkout - Keranjang Belanja</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      .total-harga {
+        font-size: 1.2em;
+        margin-top: 15px;
+      }
+      .table th, .table td {
+        text-align: center;
+      }
+      .btn-danger {
+        width: 100px;
+      }
+      .btn-primary {
+        width: 200px;
+      }
+      .btn-back {
+        width: 200px;
+        margin-top: 10px;
+      }
+      .form-group {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1>Checkout</h1>
+
+      {% if keranjang %}
+      <form method="POST" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Nama Menu</th>
+              <th>Harga</th>
+              <th>Jumlah</th>
+              <th>Total Harga</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in keranjang %}
+            <tr>
+              <td>{{ item.nama_menu }}</td>
+              <td>Rp. {{ item.harga }}</td>
+              <td>
+                <input
+                  type="number"
+                  name="jumlah_{{ forloop.counter }}"
+                  value="{{ item.jumlah }}"
+                  min="1"
+                  required
+                  class="form-control"
+                />
+              </td>
+              <td>Rp. {{ item.total_harga }}</td>
+              <td>
+                <!-- Tombol hapus -->
+                <a href="{% url 'hapus_item' item.menu_id %}" class="btn btn-danger">
+                  Hapus
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="total-harga">
+          <strong>Total Harga: </strong>Rp. {{ total_harga }}
+        </div>
+
+        <!-- Tombol Update Keranjang -->
+        <button
+          type="submit"
+          class="btn btn-primary mt-3"
+        >
+          Update Keranjang
+        </button>
+
+        <!-- Waktu Pengantaran dan Tanggal Acara -->
+        <div class="form-group">
+          <label for="tanggal_acara">Tanggal Acara</label>
+          <input
+            type="date"
+            id="tanggal_acara"
+            name="tanggal_acara"
+            class="form-control"
+            value="{{ tanggal_acara }}"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="waktu_pengantaran">Waktu Pengantaran</label>
+          <input
+            type="time"
+            id="waktu_pengantaran"
+            name="waktu_pengantaran"
+            class="form-control"
+            value="{{ waktu_pengantaran }}"
+          />
+        </div>
+
+        <!-- Tombol Konfirmasi Pesanan -->
+        <button type="submit" class="btn btn-primary mt-3">
+          Konfirmasi Pesanan
+        </button>
+      </form>
+      {% else %}
+      <p>Keranjang Anda kosong. Silakan pilih menu untuk membeli.</p>
+      {% endif %}
+
+      <!-- Tombol Kembali ke Menu -->
+      <a href="{% url 'menu_list' %}" class="btn btn-secondary btn-back">
+        Kembali ke Menu
+      </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+  </body>
+</html>

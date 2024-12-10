@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laporan Menu Terlaris</title>
+    <style>
+      /* Resetting default styling */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Global styles */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        width: 80%;
+        max-width: 800px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 2em;
+        color: #4caf50;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      table th,
+      table td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+
+      table th {
+        background-color: #4caf50;
+        color: #fff;
+      }
+
+      table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      table tr:hover {
+        background-color: #ddd;
+      }
+
+      .btn-container {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+      }
+
+      .btn-container button {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 5px;
+      }
+
+      .btn-container button:hover {
+        background-color: #45a049;
+      }
+
+      /* Kembali button */
+      .back-button {
+        margin-top: 20px;
+        display: block;
+        width: 100px;
+        padding: 10px;
+        background-color: #ff9800;
+        color: white;
+        text-align: center;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .back-button:hover {
+        background-color: #fb8c00;
+      }
+    </style>
+
+    <!-- Import jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Import SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Laporan Menu Terlaris</h1>
+
+      <!-- Buttons for Print, PDF, and Excel -->
+      <div class="btn-container">
+        <button onclick="window.print()">Print</button>
+        <button onclick="downloadPDF()">Save as PDF</button>
+        <button onclick="downloadExcel()">Save as Excel</button>
+      </div>
+
+      {% load format_filters %}
+      <table id="menuTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Nama Menu</th>
+            <th>Total Terjual</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for menu in top_menus %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ menu.0}}</td>
+            <td>{{ menu.1|format_number }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <!-- Kembali Button -->
+      <a href="javascript:history.back()" class="back-button">Kembali</a>
+    </div>
+
+    <script>
+      // Fungsi untuk mendownload PDF
+      function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Laporan Menu Terlaris", 14, 16);
+
+        // Ambil data tabel
+        const table = document.getElementById("menuTable");
+        const rows = table.getElementsByTagName("tr");
+
+        let yPosition = 30; // Awal posisi vertikal
+        for (let i = 1; i < rows.length; i++) {
+          const cols = rows[i].getElementsByTagName("td");
+          let text = [];
+          for (let j = 0; j < cols.length; j++) {
+            text.push(cols[j].innerText);
+          }
+          doc.text(text.join("  "), 14, yPosition);
+          yPosition += 10;
+        }
+
+        doc.save("laporan_menu_terlaris.pdf");
+      }
+
+      // Fungsi untuk mendownload Excel
+      function downloadExcel() {
+        const table = document.getElementById("menuTable");
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Menu Terlaris" });
+        XLSX.writeFile(wb, "laporan_menu_terlaris.xlsx");
+      }
+    </script>
+  </body>
+</html>

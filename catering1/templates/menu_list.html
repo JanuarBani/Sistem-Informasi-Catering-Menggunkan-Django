@@ -1,0 +1,528 @@
+<!DOCTYPE html> 
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilih Menu Catering</title>
+    {% load static %}
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}">
+    <style>
+        .cart-modal {
+            position: fixed;
+            top: 80px; /* Menambahkan jarak 80px di bawah header */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 80px); /* Mengurangi 80px agar modal tidak menutupi bagian bawah */
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none; /* Modal tersembunyi secara default */
+            justify-content: center;
+            align-items: flex-start; /* Agar konten modal dimulai dari atas */
+            z-index: 1000;
+            overflow-y: auto; /* Scroll modal jika item terlalu banyak */
+        }        
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            max-height: 90vh; /* Maksimum tinggi modal 90% dari viewport */
+            overflow-y: auto; /* Isi modal yang lebih panjang akan bisa di-scroll */
+        }
+
+        .close-cart-modal {
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 30px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #333;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .cart-item-img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        .cart-item-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-item-quantity input {
+            width: 50px;
+        }
+
+        .cart-summary {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .checkout-button {
+            background-color: #b8860b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .checkout-button:hover {
+            background-color: #f4a300; /* Mengubah warna latar belakang saat hover */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Menambahkan efek bayangan */
+            transform: scale(1.05); /* Membesarkan tombol sedikit */
+        }
+
+        .remove-item-button {
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            margin-left: 10px; /* Memberikan jarak antara tombol dan input jumlah */
+            border-radius: 5px;
+            transition: all 0.3s ease; /* Transisi untuk efek smooth */
+            font-size: 14px; /* Ukuran font sedikit lebih kecil */
+            width: 80px;
+        }
+        
+        .remove-item-button:hover {
+            background: darkred; /* Warna latar belakang lebih terang saat hover */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Efek bayangan */
+            transform: scale(1.1); /* Memperbesar tombol sedikit saat hover */
+        }        
+
+        /* Tombol close baru */
+        .close-button {
+            background-color: #eaeaea;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+        .close-button:hover {
+            background-color: red;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Flex untuk tombol Checkout dan Close agar berdampingan */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .add-to-cart {
+            background-color: #28a745; /* Warna hijau default */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease; /* Transisi halus untuk perubahan */
+        }
+
+        .add-to-cart:hover {
+            background-color: #218838; /* Warna latar belakang lebih gelap saat hover */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Efek bayangan */
+            transform: scale(1.05); /* Sedikit memperbesar tombol */
+        }
+
+        .menu-item img {
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transisi halus untuk efek zoom dan shadow */
+        }
+        
+        .menu-item img:hover {
+            transform: scale(1.2); /* Membesarkan gambar 10% saat hover */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Menambahkan bayangan di sekitar gambar */
+        }
+
+        .checkout-form {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .checkout-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .checkout-form input {
+            padding: 8px;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        .checkout-form button {
+            margin-top: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .checkout-form button:hover {
+            background-color: #218838;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-light fixed-top bg-white">
+        <a class="navbar-brand" href="./index.html"><img src="{% static 'myapp/img/logo.png' %}" alt="Logo"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+                <li class="nav-item active"><a class="nav-link" href="./menu.html">Pilih Menu</a></li>
+                <li class="nav-item"><a class="nav-link" href="./checkout.html">Keranjang</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <h1 class="text-center" data-aos="fade-up">Pilih Menu Catering</h1>
+
+        <!-- Dropdown kategori -->
+        <div class="my-4">
+            <form method="GET" data-aos="fade-up">
+                <select name="category_id" class="form-control" style="max-width: 300px; margin: 0 auto;">
+                    <option value="">-- Pilih Kategori --</option>
+                    {% for category in categories %}
+                    <option value="{{ category.idKate }}" {% if request.GET.category_id == category.idKate %}selected{% endif %}>
+                        {{ category.namaKategori }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary mt-3">Filter</button>
+            </form>
+        </div>
+
+        <!-- Daftar Menu -->
+        <div class="menu-list mt-5">
+            <ul>
+                {% for menu in menus %}
+                <li class="menu-item" data-aos="fade-up">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <img class="img-fluid" 
+                                src="{{ menu.img.url }}" 
+                                alt="{{ menu.namaMenu }}" 
+                                data-id="{{ menu.idMenu }}" 
+                                data-name="{{ menu.namaMenu }}" 
+                                data-price="{{ menu.harga }}" 
+                                data-image="{{ menu.img.url }}">
+                        </div>
+                        <div class="col-sm-9">
+                            <h3>{{ menu.namaMenu }}</h3>
+                            <span class="price">Rp {{ menu.harga }}</span>
+                            <p>{{ menu.deskripsi }}</p>
+
+                            <button class="btn btn-success mt-3 add-to-cart" 
+                                    data-id="{{ menu.idMenu }}" 
+                                    data-name="{{ menu.namaMenu }}" 
+                                    data-price="{{ menu.harga }}" 
+                                    data-image="{{ menu.img.url }}">Tambah ke Keranjang</button>
+                        </div>
+                    </div>
+                    <hr>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Modal untuk Keranjang -->
+        <div class="cart-modal">
+            <div class="modal-content">
+                <button class="close-cart-modal">&times;</button>
+                <h3>Keranjang Saya</h3>
+                <div class="cart-items">
+                    <!-- Items akan muncul di sini -->
+                </div>
+                <div class="cart-summary">
+                    <p>Total: <span class="total-price">Rp 0</span></p>
+                    <button class="close-button">Tutup</button>
+                    <button class="checkout-button">Checkout</button>
+
+                    <!-- Form input yang akan muncul setelah tombol Checkout ditekan -->
+                    <div class="checkout-form" style="display: none;">
+                        <div class="form-group">
+                            <label for="tanggalPemesanan">Tanggal Pemesanan:</label>
+                            <input type="date" id="tanggalPemesanan" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="waktuPengantaran">Waktu Pengantaran:</label>
+                            <input type="time" id="waktuPengantaran" class="form-control">
+                        </div>
+                    
+                        <!-- Input tersembunyi untuk ID Pelanggan -->
+                        <input type="hidden" id="idPelanggan" value="{{ request.user.id }}">
+                    
+                        <button class="btn btn-success pesan-sekarang">Pesan Sekarang</button>
+                    </div>
+                    <!-- Pesan Konfirmasi -->
+                    <div id="confirmation-message" style="display: none;">
+                        <p>Pesanan Anda telah berhasil! Terima kasih telah memesan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keranjang Icon -->
+    <div class="nav-item my-cart-icon">
+        <img src="{% static 'myapp/img/cart.svg' %}" style="width:20px;"> <span class="badge badge-notify my-cart-badge"></span>
+    </div>
+
+    <footer class="text-center py-4">
+        <p>&copy; 2024 Food Catering | <a href="#">Syarat & Ketentuan</a></p>
+    </footer>
+
+    <!-- Memuat JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init(); // Inisialisasi animasi AOS
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const cartIcon = document.querySelector('.my-cart-icon');
+            const cartModal = document.querySelector('.cart-modal');
+            const modalContent = document.querySelector('.modal-content');
+            const closeModalButton = document.querySelector('.close-cart-modal');
+            const closeButton = document.querySelector('.close-button');
+            const cartItemsContainer = document.querySelector('.cart-items');
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const checkoutButton = document.querySelector('.checkout-button');
+            const checkoutForm = document.querySelector('.checkout-form');
+            const pesanSekarangButton = document.querySelector('.pesan-sekarang');
+            const confirmationMessage = document.getElementById('confirmation-message');
+            const tanggalPemesanan = document.getElementById('tanggalPemesanan');
+            const waktuPengantaran = document.getElementById('waktuPengantaran');
+
+            // Fungsi untuk menampilkan isi keranjang di modal
+            function displayCartItems() {
+                cartItemsContainer.innerHTML = '';
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = '<p>Keranjang kosong.</p>';
+                } else {
+                    let total = 0;
+                    cart.forEach((item, index) => {
+                        const itemElement = document.createElement('div');
+                        itemElement.classList.add('cart-item');
+                        itemElement.innerHTML = `
+                            <img src="${item.image}" alt="${item.name}" class="cart-item-img">
+                            <div class="cart-item-details">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-price">Rp ${item.price}</span>
+                                <div class="cart-item-quantity">
+                                    <input type="number" value="${item.quantity || 1}" min="1" data-index="${index}">
+                                    <button class="remove-item-button" data-index="${index}">X</button>
+                                </div>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(itemElement);
+                        total += parseInt(item.price) * (item.quantity || 1); // Menambahkan harga item sesuai jumlah
+                    });
+
+                    // Menampilkan total harga
+                    const totalPrice = document.querySelector('.total-price');
+                    totalPrice.textContent = `Rp ${total}`;
+
+                    // Menghapus item dari keranjang
+                    document.querySelectorAll('.remove-item-button').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const index = this.getAttribute('data-index');
+                            cart.splice(index, 1);
+                            localStorage.setItem('cart', JSON.stringify(cart)); // Update cart di localStorage
+                            displayCartItems(); // Refresh tampilan keranjang
+                        });
+                    });
+
+                    // Mengubah jumlah item
+                    document.querySelectorAll('.cart-item-quantity input').forEach(input => {
+                        input.addEventListener('change', function() {
+                            const index = this.getAttribute('data-index');
+                            const quantity = parseInt(this.value);
+                            cart[index].quantity = quantity; // Update quantity
+                            localStorage.setItem('cart', JSON.stringify(cart));
+                            displayCartItems(); // Refresh tampilan keranjang
+                        });
+                    });
+                }
+            }
+
+            // Menangani klik pada tombol Checkout
+            checkoutButton.addEventListener('click', function() {
+                // Menampilkan form input untuk tanggal dan waktu pengantaran
+                checkoutForm.style.display = 'block';
+            });
+
+            // Menangani klik pada tombol Pesan Sekarang
+            pesanSekarangButton.addEventListener('click', function() {
+                const tanggalPemesanan = document.getElementById('tanggalPemesanan').value;
+                const waktuPengantaran = document.getElementById('waktuPengantaran').value;
+                const idPelanggan = document.getElementById('idPelanggan').value;
+
+                if (tanggalPemesanan && waktuPengantaran) {
+                    // Menghitung total harga dan jumlah item dalam keranjang
+                    let totalHarga = 0;
+                    let jumlahTotal = 0;
+                    const items = cart.map(item => {
+                        totalHarga += parseInt(item.price) * (item.quantity || 1);
+                        jumlahTotal += (item.quantity || 1);
+                        return {
+                            idMenu: item.id,
+                            jumlahItemMenu: item.quantity || 1,
+                            totalHarga: parseInt(item.price) * (item.quantity || 1),
+                        };
+                    });
+
+                    // Data yang akan dikirim ke server
+                    const pemesananData = {
+                        idPelanggan: idPelanggan,
+                        items: items,
+                        jumlahTotal: jumlahTotal,
+                        totalHarga: totalHarga,
+                        tanggalPemesanan: tanggalPemesanan,
+                        waktuPengantaran: waktuPengantaran,
+                    };
+
+                    // Mengirim data ke server menggunakan AJAX
+                    $.ajax({
+                        url: '/menu/',  // Ganti dengan URL endpoint pemesanan Anda
+                        type: 'POST',
+                        data: JSON.stringify(pemesananData),
+                        contentType: 'application/json',
+                        beforeSend: function(xhr, settings) {
+                            // Menambahkan CSRF token jika diperlukan
+                            const csrfToken = getCookie('csrftoken'); // Fungsi untuk mendapatkan CSRF token
+                            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                        },
+                        success: function(response) {
+                            alert('Pesanan berhasil dibuat!');
+                            cart = []; // Mengosongkan keranjang
+                            localStorage.setItem('cart', JSON.stringify(cart)); // Menyimpan keranjang kosong
+                            displayCartItems(); // Menampilkan keranjang kosong
+                            cartModal.style.display = 'none'; // Menutup modal keranjang
+                        },
+                        error: function(error) {
+                            alert('Terjadi kesalahan. Silakan coba lagi.');
+                        }
+                    });
+
+                    // Sembunyikan form dan tampilkan pesan konfirmasi setelah mengirim pemesanan
+                    hideFormAndShowConfirmation();
+
+                } else {
+                    alert('Harap lengkapi semua input.');
+                }
+            });
+
+            // Fungsi untuk mendapatkan CSRF token dari cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Tampilkan modal keranjang saat ikon keranjang diklik
+            cartIcon.addEventListener('click', function() {
+                cartModal.style.display = 'flex';
+                displayCartItems(); // Tampilkan isi keranjang
+            });
+
+            // Tutup modal keranjang
+            closeModalButton.addEventListener('click', function() {
+                cartModal.style.display = 'none';
+            });
+
+            // Tutup modal menggunakan tombol "Tutup"
+            closeButton.addEventListener('click', function() {
+                cartModal.style.display = 'none';
+            });
+
+            // Menambah item ke keranjang
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const name = this.getAttribute('data-name');
+                    const price = this.getAttribute('data-price');
+                    const image = this.getAttribute('data-image');
+
+                    // Cek apakah item sudah ada di keranjang
+                    let existingItem = cart.find(item => item.id === id);
+                    if (existingItem) {
+                        existingItem.quantity += 1; // Jika ada, tambahkan jumlahnya
+                    } else {
+                        const item = { id, name, price, image, quantity: 1 };
+                        cart.push(item); // Tambah item baru
+                    }
+
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    displayCartItems(); // Refresh tampilan keranjang
+
+                    // Update jumlah item di ikon keranjang
+                    document.querySelector('.my-cart-badge').textContent = cart.length;
+                });
+            });
+
+            // Menampilkan form checkout
+            function showCheckoutForm() {
+                checkoutForm.style.display = 'block'; // Tampilkan form checkout
+            }
+
+            // Menyembunyikan form dan menampilkan pesan konfirmasi
+            function hideFormAndShowConfirmation() {
+                const tanggal = tanggalPemesanan.value;
+                const waktu = waktuPengantaran.value;
+
+                // Simpan data pemesanan ke localStorage (opsional, tergantung kebutuhan)
+                localStorage.setItem('tanggalPemesanan', tanggal);
+                localStorage.setItem('waktuPengantaran', waktu);
+
+                // Sembunyikan form checkout
+                checkoutForm.style.display = 'none';
+
+                // Tampilkan pesan konfirmasi
+                confirmationMessage.style.display = 'block';
+            }
+
+        });
+
+    </script>
+</body>
+
+</html>

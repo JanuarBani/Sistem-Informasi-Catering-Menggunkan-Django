@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nota Belanjaan</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Nota Belanjaan</h1>
+
+      <!-- Menampilkan Pesan Sukses -->
+      {% if messages %}
+      <div class="alert alert-success">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <h3>Detail Pemesanan</h3>
+      <table>
+        <tr>
+          <td><strong>ID Pemesanan:</strong></td>
+          <td>{{ pemesanan.id }}</td>
+        </tr>
+        <tr>
+          <td><strong>Pelanggan:</strong></td>
+          <td>{{ pemesanan.idPelanggan.nama }}</td>
+        </tr>
+        <tr>
+          <td><strong>Tanggal Pemesanan:</strong></td>
+          <td>{{ pemesanan.tanggalPemesanan }}</td>
+        </tr>
+        <tr>
+          <td><strong>Waktu Pengantaran:</strong></td>
+          <td>{{ pemesanan.waktuPengantaran }}</td>
+        </tr>
+        <tr>
+          <td><strong>Total Harga:</strong></td>
+          <td>Rp {{ pemesanan.totalHarga }}</td>
+        </tr>
+      </table>
+
+      <h3>Item dalam Keranjang:</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Jumlah</th>
+            <th>Harga Satuan</th>
+            <th>Total Harga</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in keranjang %}
+          <tr>
+            <td>{{ item.produk }}</td>
+            <td>{{ item.jumlah }}</td>
+            <td>Rp {{ item.harga_satuan }}</td>
+            <td>Rp {{ item.total_harga }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <br /><br />
+      <a href="{% url 'home' %}">Kembali ke halaman utama</a>
+    </div>
+  </body>
+</html>

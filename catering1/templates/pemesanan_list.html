@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laporan Pemesanan Pelanggan</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        width: 94%; /* Membuat kontainer lebih lebar */
+        max-width: 1400px; /* Membatasi ukuran maksimal agar tidak terlalu besar */
+        margin: 0 auto; /* Centering container */
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 2em;
+        color: #4caf50;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      table th,
+      table td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+
+      table th {
+        background-color: #4caf50;
+        color: #fff;
+      }
+
+      table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      table tr:hover {
+        background-color: #ddd;
+      }
+
+      .btn-container {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+      }
+
+      .btn-container button {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn-container button:hover {
+        background-color: #45a049;
+      }
+
+      .back-button {
+        margin-top: 20px;
+        display: block;
+        width: 100px;
+        padding: 10px;
+        background-color: #ff9800;
+        color: white;
+        text-align: center;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .back-button:hover {
+        background-color: #fb8c00;
+      }
+
+      /* Memperbesar tabel detail menu */
+      table table {
+        width: 100%;
+        border: none;
+        margin-top: 10px;
+      }
+
+      table td {
+        white-space: nowrap;
+      }
+
+      table td table td {
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Laporan Pemesanan Pelanggan</h1>
+
+      <div class="btn-container">
+        <button onclick="window.print()">Print</button>
+        <button onclick="downloadPDF()">Save as PDF</button>
+        <button onclick="downloadExcel()">Save as Excel</button>
+      </div>
+
+      {% if pemesanan_data %} {% load format_filters %}
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID Pemesanan</th>
+            <th>Nama Pelanggan</th>
+            <th>Tanggal Pemesanan</th>
+            <th>Status</th>
+            <th>Detail Menu</th>
+            <th>Total Harga</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pemesanan in pemesanan_data %}
+          <tr>
+            <td>{{ pemesanan.id_pemesanan }}</td>
+            <td>{{ pemesanan.pelanggan }}</td>
+            <td>{{ pemesanan.tanggal }}</td>
+            <td>{{ pemesanan.status }}</td>
+            <td>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nama Menu</th>
+                    <th>Jumlah Item</th>
+                    <th>Harga per Item</th>
+                    <th>Sub Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for detail in pemesanan.detail_pemesanan %}
+                  <tr>
+                    <td>{{ detail.nama_menu }}</td>
+                    <td>{{ detail.jumlah_item }}</td>
+                    <td>{{ detail.harga_per_item|floatformat:2 }}</td>
+                    <td>{{ detail.sub_total|format_number }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </td>
+            <td>{{ pemesanan.total_harga|format_number }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% else %}
+      <p>Tidak ada data pemesanan.</p>
+      {% endif %}
+
+      <a href="javascript:history.back()" class="back-button">Kembali</a>
+    </div>
+
+    <script>
+      function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Laporan Pemesanan Pelanggan", 14, 16);
+
+        const table = document.querySelector("table");
+        const rows = table.getElementsByTagName("tr");
+
+        let yPosition = 30;
+        for (let i = 1; i < rows.length; i++) {
+          const cols = rows[i].getElementsByTagName("td");
+          let text = [];
+          for (let j = 0; j < cols.length; j++) {
+            text.push(cols[j].innerText);
+          }
+          doc.text(text.join("  "), 14, yPosition);
+          yPosition += 10;
+        }
+
+        doc.save("laporan_pemesanan_pelanggan.pdf");
+      }
+
+      function downloadExcel() {
+        const table = document.querySelector("table");
+        const wb = XLSX.utils.table_to_book(table, {
+          sheet: "Pemesanan Pelanggan",
+        });
+        XLSX.writeFile(wb, "laporan_pemesanan_pelanggan.xlsx");
+      }
+    </script>
+  </body>
+</html>

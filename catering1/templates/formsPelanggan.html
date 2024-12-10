@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrasi Pelanggan</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;900&display=swap");
+
+      body {
+        margin: 0;
+        width: 100vw;
+        height: 102vh;
+        background: #ecf0f3;
+        display: flex;
+        flex-direction: column; /* Mengatur flex direction */
+        justify-content: center; /* Memusatkan secara vertikal */
+        align-items: center; /* Memusatkan secara horizontal */
+        font-family: "Poppins", sans-serif;
+      }
+
+      nav {
+        background: #1da1f2; /* Warna latar belakang navbar */
+        padding: 10px; /* Padding untuk navbar */
+        text-align: center; /* Rata tengah */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Bayangan */
+        width: 100%; /* Menjaga navbar memenuhi lebar */
+      }
+
+      nav a {
+        color: white; /* Warna teks */
+        margin: 0 15px; /* Ruang antara tautan */
+        text-decoration: none; /* Menghapus garis bawah */
+        font-weight: bold; /* Membuat teks lebih tebal */
+        transition: color 0.3s, background-color 0.3s; /* Transisi halus */
+        padding: 8px 12px; /* Memberikan padding untuk area klik yang lebih baik */
+        border-radius: 5px; /* Memberikan sudut yang membulat */
+      }
+
+      nav a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #1da1f2;
+      }
+
+      .container {
+        position: relative;
+        width: 370px;
+        height: 650px;
+        border-radius: 20px;
+        padding: 20px;
+        box-sizing: border-box;
+        background: #ecf0f3;
+        box-shadow: 14px 14px 20px #cbced1, -14px -14px 20px white;
+        overflow-y: auto; /* Menambahkan scroll */
+        margin-top: 20px; /* Menambahkan jarak antara navbar dan kontainer */
+      }
+
+      .brand-logo {
+        height: 130px;
+        width: 130px;
+        background: url("https://images-workbench.99static.com/sSojV9Jv2qr1-InjTFGnKHQbHt8=/99designs-contests-attachments/102/102163/attachment_102163382")
+          no-repeat center/cover;
+        background-size: 150%;
+        margin: auto;
+        border-radius: 50%;
+        box-shadow: 7px 7px 10px #cbced1, -7px -7px 10px white;
+      }
+
+      .brand-title {
+        margin-top: 10px;
+        font-weight: 900;
+        font-size: 1.8rem;
+        color: #1da1f2;
+        letter-spacing: 1px;
+        text-align: center;
+      }
+
+      .inputs {
+        text-align: left;
+        margin-top: 30px;
+      }
+
+      label,
+      input,
+      button {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: none;
+        outline: none;
+        box-sizing: border-box;
+      }
+
+      label {
+        margin-bottom: 4px;
+      }
+
+      input::placeholder {
+        color: gray;
+      }
+
+      input {
+        background: #ecf0f3;
+        padding: 10px;
+        height: 50px;
+        font-size: 14px;
+        border-radius: 50px;
+        box-shadow: inset 6px 6px 6px #cbced1, inset -6px -6px 6px white;
+      }
+
+      button {
+        color: white;
+        margin-top: 20px;
+        background: #1da1f2;
+        height: 40px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 900;
+        box-shadow: 10px 10px 10px #cbced1, -10px -10px 10px white;
+        transition: 0.5s;
+      }
+
+      button:hover {
+        box-shadow: none;
+      }
+
+      a.footer-link {
+        position: absolute;
+        font-size: 10px;
+        bottom: 10px;
+        right: 10px;
+        text-decoration: none;
+        color: black;
+        background: yellow;
+        border-radius: 10px;
+        padding: 4px 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="http://127.0.0.1:8000/">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="container">
+      <div class="brand-logo"></div>
+      <div class="brand-title">Registrasi Pelanggan</div>
+
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <form method="POST" action="{% url 'create_pelanggan' %}">
+        {% csrf_token %}
+        <div class="inputs">
+          <label>ID Pelanggan</label>
+          <input type="text" name="idPelanggan" placeholder="Masukkan ID Pelanggan" required />
+
+          <label>Nama</label>
+          <input type="text" name="nama" placeholder="Masukkan Nama" required />
+
+          <label>Alamat</label>
+          <input type="text" name="alamat" placeholder="Masukkan Alamat" required />
+
+          <label>Pekerjaan</label>
+          <input type="text" name="pekerjaan" placeholder="Masukkan Pekerjaan" required />
+
+          <label>Username</label>
+          <input type="text" name="username" placeholder="Masukkan Username" required />
+
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Masukkan Password" required />
+
+          <button type="submit">Simpan</button>
+        </div>
+      </form>
+    </div>
+    <a href="https://twitter.com/prathkum" class="footer-link">MADE BY PRATHAM</a>
+  </body>
+</html>

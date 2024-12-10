@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laporan Pemesanan Acara</title>
+    <style>
+      /* Resetting default styling */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Global styles */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        width: 94%; /* Lebih besar daripada sebelumnya */
+        max-width: 1400px; /* Membatasi ukuran maksimal agar tidak terlalu besar */
+        margin: 0 auto; /* Centering container */
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 2em;
+        color: #4caf50;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      table th,
+      table td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+
+      table th {
+        background-color: #4caf50;
+        color: #fff;
+      }
+
+      table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      table tr:hover {
+        background-color: #ddd;
+      }
+
+      .btn-container {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+      }
+
+      .btn-container button {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn-container button:hover {
+        background-color: #45a049;
+      }
+
+      /* Kembali button */
+      .back-button {
+        margin-top: 20px;
+        display: block;
+        width: 100px;
+        padding: 10px;
+        background-color: #ff9800;
+        color: white;
+        text-align: center;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .back-button:hover {
+        background-color: #fb8c00;
+      }
+    </style>
+
+    <!-- Import jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Import SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Laporan Pemesanan Acara</h1>
+
+      <!-- Buttons for Print, PDF, and Excel -->
+      <div class="btn-container">
+        <button onclick="window.print()">Print</button>
+        <button onclick="downloadPDF()">Save as PDF</button>
+        <button onclick="downloadExcel()">Save as Excel</button>
+      </div>
+
+      <table id="pemesananTable">
+        <thead>
+          <tr>
+            <th>ID Pemesanan</th>
+            <th>Nama Pelanggan</th>
+            <th>Nama Acara</th>
+            <th>Tanggal Pemesanan</th>
+            <th>Status</th>
+            <th>Detail Menu</th>
+            <th>Total Harga</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pemesanan in laporan_data %} {% load format_filters %}
+          <tr>
+            <td>{{ pemesanan.id_pemesanan }}</td>
+            <td>{{ pemesanan.nama_pelanggan }}</td>
+            <td>{{ pemesanan.nama_acara }}</td>
+            <td>{{ pemesanan.tanggal_pemesanan }}</td>
+            <td>{{ pemesanan.status }}</td>
+            <td>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nama Menu</th>
+                    <th>Jumlah</th>
+                    <th>Harga per Item</th>
+                    <th>Sub Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for detail in pemesanan.detail_pemesanan %}
+                  <tr>
+                    <td>{{ detail.menu }}</td>
+                    <td>{{ detail.jumlah }}</td>
+                    <td>{{ detail.harga_per_item |format_number}}</td>
+                    <td>{{ detail.total_harga_item |format_number }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </td>
+            <td>{{ pemesanan.total_harga|format_number }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Kembali Button -->
+      <a href="javascript:history.back()" class="back-button">Kembali</a>
+    </div>
+
+    <script>
+      // Fungsi untuk mendownload PDF
+      function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Laporan Pemesanan Acara", 14, 16);
+
+        // Ambil data tabel
+        const table = document.getElementById("pemesananTable");
+        const rows = table.getElementsByTagName("tr");
+
+        let yPosition = 30; // Awal posisi vertikal
+        for (let i = 1; i < rows.length; i++) {
+          const cols = rows[i].getElementsByTagName("td");
+          let text = [];
+          for (let j = 0; j < cols.length; j++) {
+            text.push(cols[j].innerText);
+          }
+          doc.text(text.join("  "), 14, yPosition);
+          yPosition += 10;
+        }
+
+        doc.save("laporan_pemesanan_acara.pdf");
+      }
+
+      // Fungsi untuk mendownload Excel
+      function downloadExcel() {
+        const table = document.getElementById("pemesananTable");
+        const wb = XLSX.utils.table_to_book(table, {
+          sheet: "Pemesanannya",
+        });
+        XLSX.writeFile(wb, "laporan_pemesanan_acara.xlsx");
+      }
+    </script>
+  </body>
+</html>
